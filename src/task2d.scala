@@ -1,8 +1,5 @@
 import org.apache.spark.{SparkConf, SparkContext}
 
-/**
-  * Created by balde on 10.03.2017.
-  */
 object task2d {
 
   def main(args: Array[String]): Unit = {
@@ -11,10 +8,8 @@ object task2d {
 
 
     val listings = sc.textFile("..\\airbnb_data\\listings_us.csv")
-    val listingsRdd = listings.map(line => line.split("\t"))
 
-    val header = listingsRdd.first()
-    val listingsData = listingsRdd.mapPartitionsWithIndex { (idx, iter) => if (idx == 0) iter.drop(1) else iter }
+    val listingsData = listings.map(line => line.split("\t")).mapPartitionsWithIndex { (idx, iter) => if (idx == 0) iter.drop(1) else iter }
 
     //ID
     val row43 = listingsData.map(row => row(43).toInt)
