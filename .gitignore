@@ -11,6 +11,9 @@ lib_managed/
 src_managed/
 project/boot/
 project/plugins/project/
+.idea/libraries/jars.xml
+.idea/workspace.xml
+.idea/vcs.xml
 
 # Scala-IDE specific
 .scala_dependencies
