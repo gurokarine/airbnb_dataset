@@ -14,18 +14,20 @@ object task2b {
         nr = row.length
       )
 
+      val listingsValues = listingsRdd.mapPartitionsWithIndex { (idx, iter) => if (idx == 0) iter.drop(1) else iter }
       val z = new Array[Long](nr)
+      val names = listingsRdd.first()
       val i = 0
       for(i <- 0 to nr-1){
-          z(i) = listingsRdd.map(row =>
+          z(i) = listingsValues.map(row =>
             if(row.length > i){
               row(i)
             }
           ).distinct.count()
       }
 
-      for (zval <- z){
-        println(zval)
+      for (i <- 0 to nr-1){
+        println(names(i) +": "+z(i))
       }
     }
 }
