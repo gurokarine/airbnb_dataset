@@ -1,5 +1,8 @@
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
+/**
+  Average booking price per night.
+ */
 
 object task3a {
 
@@ -7,13 +10,13 @@ object task3a {
 
     val conf = new SparkConf().setAppName("AirBnB").setMaster("local[*]")
     val sc = new SparkContext(conf)
-    val file2 = sc.textFile("..\\airbnb_data\\listings_us.csv")
+    val listings = sc.textFile("..\\airbnb_data\\listings_us.csv")
 
-    val listings_split = file2.filter(line => !line.contains("city")).map( line => line.split("\t") )
-    val cities = listings_split.map(row => (row(15), (row(65).replace("$", "").replace(",", "").toDouble, 1)))
+    val listings_split = listings.map(line => line.split("\t")).mapPartitionsWithIndex { (idx, iter) => if (idx == 0) iter.drop(1) else iter }
+    val cities = listings_split.map(row => (row(15), (row(65).replaceAll("[$,]", "").toDouble, 1)))
     val average_price = cities.reduceByKey((a,b) => (a._1 + b._1 , a._2 + b._2))
 
-    average_price.foreach(row => println(((row._1),row._2._1/row._2._2)))
+    average_price.foreach(row => println((row._1,row._2._1/row._2._2)))
     
   }
 }

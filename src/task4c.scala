@@ -27,6 +27,6 @@ object task4c {
     joining.filter(_._1.contains("New York")).map(_.swap).top(3).foreach(println)
     joining.filter(_._1.contains("San Francisco")).map(_.swap).top(3).foreach(println)
     joining.filter(_._1.contains("Seattle")).map(_.swap).top(3).foreach(println)
-    
+
   }
 }
