@@ -10,7 +10,7 @@ object task2c {
     val sc = new SparkContext(conf)
     val file2 = sc.textFile("..\\airbnb_data\\listings_us.csv")
 
-    val listings_split = file2.filter(line => !line.contains("city")).map( line => line.split("\t") )
+    val listings_split = file2.map(line => line.split("\t")).mapPartitionsWithIndex { (idx, iter) => if (idx == 0) iter.drop(1) else iter }
     val cities = listings_split.map(row => (row(15), 1))
     cities.reduceByKey((a,b) => a + b).sortBy(_._2).foreach ( println _)
 
