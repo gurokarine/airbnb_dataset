@@ -1,5 +1,9 @@
 import org.apache.spark.{SparkConf, SparkContext}
 
+/**
+  *  Calculate number of distinct values for each field (i.e., column) in the listings dataset.
+  */
+
 object task2b {
 
     def main(args: Array[String]): Unit = {

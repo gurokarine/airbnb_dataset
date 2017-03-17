@@ -2,6 +2,10 @@ import java.io.{File, PrintWriter}
 
 import org.apache.spark.{SparkConf, SparkContext}
 
+/**
+  * For each city, find top 3 guests (reviewers) ranked by their number of bookings
+  */
+
 object task5a {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("AirBnB").setMaster("local[*]")

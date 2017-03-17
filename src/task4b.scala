@@ -9,9 +9,9 @@ object task4b {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("AirBnB").setMaster("local[*]")
     val sc = new SparkContext(conf)
-    val file2 = sc.textFile("..\\airbnb_data\\listings_us.csv")
+    val listings = sc.textFile("..\\airbnb_data\\listings_us.csv")
 
-    val listingsData = file2.map(line => line.split("\t")).mapPartitionsWithIndex { (idx, iter) => if (idx == 0) iter.drop(1) else iter }
+    val listingsData = listings.map(line => line.split("\t")).mapPartitionsWithIndex { (idx, iter) => if (idx == 0) iter.drop(1) else iter }
 
     val num_listings = listingsData.map(row => (row(28).toLong, (0+row(31)).toDouble))
     val num_listings_reduce = num_listings.reduceByKey((a,b) => a)

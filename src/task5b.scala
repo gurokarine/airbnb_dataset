@@ -1,5 +1,9 @@
 import org.apache.spark.{SparkConf, SparkContext}
 
+/**
+  *  Find a guest who spent the most money on accommodation (irrespective of city, time) and report the amount.
+  */
+
 object task5b {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("AirBnB").setMaster("local[*]")

@@ -1,5 +1,9 @@
 import org.apache.spark.{SparkConf, SparkContext}
 
+/**
+  * Min and Max value for important fields in task 2d
+  */
+
 object task2d {
 
   def main(args: Array[String]): Unit = {
