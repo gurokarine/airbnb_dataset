@@ -1,3 +1,5 @@
+import java.io.{File, PrintWriter}
+
 import org.apache.spark.{SparkConf, SparkContext}
 
 object task5a {
@@ -15,10 +17,24 @@ object task5a {
 
     val city_reviews = cities.join(reviews).map(row => (row._2._1 +" - "+ row._2._2._1+" - "+row._2._2._2, 1))
     val best_reviewers = city_reviews.reduceByKey((a,b) => a + b)
-    best_reviewers.filter(_._1.contains("New York")).map(_.swap).top(3).foreach(println)
-    best_reviewers.filter(_._1.contains("Seattle")).map(_.swap).top(3).foreach(println)
-    best_reviewers.filter(_._1.contains("San Francisco")).map(_.swap).top(3).foreach(println)
+    val newYork = best_reviewers.filter(_._1.contains("New York")).map(_.swap).top(3)
+    val seattle = best_reviewers.filter(_._1.contains("Seattle")).map(_.swap).top(3)
+    val sanFrancisco = best_reviewers.filter(_._1.contains("San Francisco")).map(_.swap).top(3)
 
+    val toFileStringsNY = newYork.map(row => row._2+","+row._1)
+    val toFileStringsS = seattle.map(row => row._2+","+row._1)
+    val toFileStringsSF = sanFrancisco.map(row => row._2+","+row._1)
+    val pw = new PrintWriter(new File("csv-files/task5a.csv" ))
+    for(line <- toFileStringsNY){
+      pw.write(line+"\n")
+    }
+    for(line <- toFileStringsS){
+      pw.write(line+"\n")
+    }
+    for(line <- toFileStringsSF){
+      pw.write(line+"\n")
+    }
+    pw.close
 
   }
 }

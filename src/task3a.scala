@@ -1,5 +1,7 @@
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
+import java.io._
+
 /**
   Average booking price per night.
  */
@@ -16,7 +18,14 @@ object task3a {
     val cities = listings_split.map(row => (row(15), (row(65).replaceAll("[$,]", "").toDouble, 1)))
     val average_price = cities.reduceByKey((a,b) => (a._1 + b._1 , a._2 + b._2))
 
-    average_price.foreach(row => println((row._1,row._2._1/row._2._2)))
-    
+    val city_average_price = average_price.map(row => (row._1, row._2._1/row._2._2))
+
+    val toFileStrings = city_average_price.map(a => a._1 + "," + a._2).collect()
+
+    val pw = new PrintWriter(new File("csv-files/task3a.csv" ))
+    for(line <- toFileStrings){
+      pw.write(line+"\n")
+    }
+    pw.close
   }
 }
