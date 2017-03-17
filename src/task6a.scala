@@ -1,9 +1,10 @@
 import org.apache.spark.sql.{SQLContext}
 import org.apache.spark.{SparkConf, SparkContext}
-import spray.json.DefaultJsonProtocol
-
+import org.apache.spark.sql.functions._
 import scala.collection.mutable.ArrayBuffer
 
+import spray.json._
+import DefaultJsonProtocol._
 
 
 object task6a {
@@ -14,22 +15,39 @@ object task6a {
 
     case class Properties(
                            neighbourhood: String,
-                           neighbourhood_group: String
+                           neighbourhood_group: Option[String]
                          )
     case class Geometry(
-                       coordinates: ArrayBuffer[String],
-                       geometry_type: String
+                       coordinates: Seq[Seq[Seq[Seq[Double]]]],
+                       `type`: String
                        )
 
     case class GeoJSON(
                       properties: Properties,
                       geometry: Geometry,
-                      geojson_type: String
+                      `type`: String
                       )
 
     case class Features(
-                         features: ArrayBuffer[GeoJSON]
+                       features: Seq[GeoJSON],
+                       `type`: String
                        )
+
+    object MyJsonProtocol extends DefaultJsonProtocol {
+      implicit val propertiesFormat = jsonFormat2(Properties)
+      implicit val geometryFormat = jsonFormat2(Geometry)
+      implicit val geojsonFormat = jsonFormat3(GeoJSON)
+      implicit val featuresFormat = jsonFormat2(Features)
+    }
+
+    import MyJsonProtocol._
+
+    val input = scala.io.Source.fromFile("..\\airbnb_data\\neighbourhoods.geojson")("UTF-8").mkString.parseJson
+
+    val jsonCollection = input.convertTo[Features]
+
+    val features = jsonCollection.features
+
 
 
     /*
@@ -47,6 +65,7 @@ object task6a {
       val coords = theNeighbourhood.select(explode($"coordinates")).toDF("coordinates").select(explode($"coordinates")).toDF("coordinates").select(explode($"coordinates")).toDF("coordinates").select(explode($"coordinates")).toDF("coordinates")
       val coordList = coords.collect().toList
       var lastCoord = 0.0
+      val array = new ArrayBuffer[(Double, Double)]()
       for (coordRow <- coordList){
         var newCoord = 0.0
         coordRow(0) match {
@@ -58,12 +77,12 @@ object task6a {
           lastCoord = newCoord
         } else {
           println(lastCoord+" : "+newCoord)
+          var c = (lastCoord, newCoord)
+          array += c
           lastCoord = 0.0
-
 
         }
       }
-    }
-*/
+    }*/
   }
 }
