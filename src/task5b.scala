@@ -15,6 +15,6 @@ object task5b {
 
     val city_reviews = cities.join(reviews).map(row => (row._2._2._1+" - "+row._2._2._2, row._2._1))
     val best_reviewers = city_reviews.reduceByKey((a,b) => a + b)
-    best_reviewers.map(_.swap).top(100).foreach(println)
+    best_reviewers.map(_.swap).top(1).foreach(println)
   }
 }
