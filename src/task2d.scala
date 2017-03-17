@@ -27,12 +27,12 @@ object task2d {
     val min54 = row54.min()
 
     //Price
-    val row65 = listingsData.map(row => row(65).replaceAll("[$,]", "").toDouble)
+    val row65 = listingsData.filter(row => !row(65).contains("$0.0")).map(row => row(65).replaceAll("[$,]", "").toDouble)
     val max65 = row65.max()
     val min65 = row65.min()
 
-  //Guest included
-    val row23 = listingsData.map(row => row(23).toInt)
+  //Ameneties
+    val row23 = listingsData.map(row => row(1))
     val max23 = row23.max()
     val min23 = row23.min()
 
@@ -40,6 +40,6 @@ object task2d {
     println("Latitude, max: "+max51+", min: "+min51)
     println("Longitude, max: "+max54+", min: "+min54)
     println("Price, max: "+max65+", min: "+min65)
-    println("Guests, max: "+max23+", min: "+min23)
+    println("Accomodates, max: "+max23+", min: "+min23)
   }
 }
