@@ -1,15 +1,21 @@
 import org.apache.spark.{SparkConf, SparkContext}
 
+/**
+  *  Global average number of listings per host
+  */
+
 object task4a {
 
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("AirBnB").setMaster("local[*]")
     val sc = new SparkContext(conf)
-    val file2 = sc.textFile("..\\airbnb_data\\listings_us.csv")
+    val listings = sc.textFile("..\\airbnb_data\\listings_us.csv")
 
-    val listingsData = file2.map(line => line.split("\t")).mapPartitionsWithIndex { (idx, iter) => if (idx == 0) iter.drop(1) else iter }
+    //remove headerline and split lines with tab
+    val listingsData = listings.map(line => line.split("\t")).mapPartitionsWithIndex { (idx, iter) => if (idx == 0) iter.drop(1) else iter }
 
-    val num_listings = listingsData.map(row => (row(28).toLong, (0+row(31)).toDouble))
+    //map host_id with 1, and reduce with host id as key
+    val num_listings = listingsData.map(row => (row(28).toLong, 1))
     val num_listings_reduce = num_listings.reduceByKey((a,b) => a)
 
     val num_hosts = num_listings_reduce.count()
