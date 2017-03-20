@@ -24,6 +24,7 @@ object task4c {
 
     val joining = listingsMap.join(calendarReduce).map(row=> (row._2._1._3, (row._2._1._2 * row._2._2, row._2._1._1)))
 
+    //the top() function maps on the key which is cities in this case, so we use the swap() function to get estimated income as key
     joining.filter(_._1.contains("New York")).map(_.swap).top(3).foreach(println)
     joining.filter(_._1.contains("San Francisco")).map(_.swap).top(3).foreach(println)
     joining.filter(_._1.contains("Seattle")).map(_.swap).top(3).foreach(println)
