@@ -1,23 +1,21 @@
+import java.io.{File, PrintWriter}
+import java.util
+
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.{SparkConf, SparkContext}
 import spray.json._
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 
-object task6a {
+object task6b {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("AirBnB").setMaster("local[*]")
     val sc = new SparkContext(conf)
     val listings = sc.textFile("..\\airbnb_data\\listings_us.csv")
     val listingsData = listings.map(line => line.split("\t")).mapPartitionsWithIndex { (idx, iter) => if (idx == 0) iter.drop(1) else iter }
-    val neighborhood_test = sc.textFile("..\\airbnb_data\\neighborhood_test.csv")
-    val neighborhood_testData = neighborhood_test.map(line => line.split("\t")).mapPartitionsWithIndex { (idx, iter) => if (idx == 0) iter.drop(1) else iter }
 
-    val listingmap = listingsData.map(row => (row(43).toLong, (row(54).toDouble, row(51).toDouble)))
-    val neighbormap = neighborhood_testData.map(row => (row(0).toLong, row(1)))
-
-    val joinmap = listingmap.join(neighbormap).collect()
+    val listingmap = listingsData.map(row => ((row(54).toDouble, row(51).toDouble),row(2)))
 
     case class Properties(
                            neighbourhood: String,
@@ -53,10 +51,11 @@ object task6a {
     val jsonCollection = input.convertTo[Features]
 
     val features = jsonCollection.features
-    var correctCount = 0
 
-    for(testData <- joinmap){
-      val point = new Point(testData._2._1._1, testData._2._1._2)
+    var neighbourhood_list = new ListBuffer[((Double, Double), String)]()
+
+    for(aListing <- listingmap.collect()){
+      val point = new Point(aListing._1._1, aListing._1._2)
       var foundNeighborhood = ""
       var foundNeighborhood_group = ""
       for (geojson <- features) {
@@ -92,21 +91,25 @@ object task6a {
         if (num > 0) {
           if (num % 2 != 0) {
             foundNeighborhood = name
-            foundNeighborhood_group = group.get
+            if(!group.isEmpty) {
+              foundNeighborhood_group = group.get
+            }
           }
         }
       }
-      if(testData._2._2.equals(foundNeighborhood)){
-        correctCount = correctCount + 1
-      } else if(testData._2._2.equals(foundNeighborhood_group)){
-        correctCount = correctCount + 1
-      }else {
-        println(testData._2._2+" - "+foundNeighborhood+"("+foundNeighborhood_group+"): "+testData._2._1)
-      }
+      val entry = ((aListing._1._1, aListing._1._2), foundNeighborhood)
+      neighbourhood_list += entry
     }
-    val count = joinmap.length
-    println("Count: "+count)
-    println("Correct: "+correctCount)
-    println("Correctness: "+(correctCount*100.0/count)+"%")
+    val neighbourhoodRDD = sc.parallelize(neighbourhood_list)
+    val joinmap = listingmap.join(neighbourhoodRDD).map(row => (row._2._2, row._2._1.replaceAll("[{}\"]", "").split(",")))
+    val merge = joinmap.reduceByKey((a,b) => (a ++ b).distinct)
+
+    val toFileStrings = merge.map(row => row._1+",{"+row._2.mkString(",")+"}").collect()
+
+    val pw = new PrintWriter(new File("csv-files/task6b.csv" ))
+    for(line <- toFileStrings){
+      pw.write(line+"\n")
+    }
+    pw.close
   }
 }
